@@ -13,14 +13,14 @@ Transport | Type |Capabilities | Speed (on 3.5GHz Ryzen)
 ----------|------|-------------|---------------------------------
 tap | vector | checksum and tso offloads | > 8GBit
 hybrid | vector | checksum and tso offloads, multipacket rx | > 6GBit
-raw | vector | checksum and tso, offloads, multipacket rx, tx | > 6GBit
+raw | vector | checksum and tso offloads, multipacket rx, tx | > 6GBit
 Ethernet over gre | vector | multipacket rx, tx | > 3Gbit
 Ethernet over l2tpv3 | vector | multipacket rx, tx | > 3Gbit
 bess | vector | multipacket rx, tx | > 3Gbit
 tuntap | legacy | none | ~ 500Mbit
 daemon | legacy | none | ~ 450Mbit
 socket | legacy | none | ~ 450Mbit
-pcap | legacy | none | ~400Mbit, rx only
+pcap | legacy | none | ~ 400Mbit, rx only
 ethertap | obsolete | none | uknown
 vde | obsolete | none | uknown
 
@@ -43,6 +43,8 @@ for options is:
 
 vecX:transport="Transport Name",option=value,option=value,...,option=value
 
+### Common options
+
 These options are common for all transports:
 1. depth = int - sets the queue depth for vector IO. This is the amount of packets UML will attempt to read or write in a single system call. The default number
 is 64 and is generally sufficient for most ~ 2-4G applications. Higher speeds
@@ -51,15 +53,20 @@ may require larger values.
 1. gro = 0/1 - sets GRO on or off. The offload which is most commonly enabled
 as a result of this option being on is TCP if it is possible. Note, that it
 is usually enabled by default on local machine interfaces (f.e. veth pairs),
-so it should be enabled for a lot of transports for networking to operate
+so it should be enabled in UML for a lot of transports for networking to operate
 correctly.
 1. mtu = int - sets the interface mtu
 1. headroom = int - adjusts the default headroom (32 bytes) reserved if a packet
 will need to be re-encapsulated into let's say VXLAN.
 
+# Shared Options
 
-Transports which bind to a local network interface share another option - the
-name of the interface to bind to. This is the ifname option. 
+1. ifname = str Transports which bind to a local network interface share another option - the
+name of the interface to bind to. This is the ifname option.
+1. src, dst, src\_port, dst\_port - all transports which use a sockets which has the notion
+of source and destination and/or source port and destination port use these to specify them.
+1. v6 = 0/1 to specify if a v6 connection is desired for all transports which operate over
+IP.
 
 ### tap transport
 
@@ -74,8 +81,8 @@ tap0 can be either configured as a point-to-point interface and given ip
 address so that UML can talk to the host. Alternatively, it is possible to
 connect UML to a tap interface which is a part of the bridge.
 
-While tap relies on the vector infrastructure it is not a true vector transport
-at this point because Linux does not support multi-packet IO on tap
+While tap relies on the vector infrastructure, it is not a true vector transport
+at this point, because Linux does not support multi-packet IO on tap
 file descriptors for normal userspace apps like UML. This is a privilege
 which is offered only to something which can hook up to it at kernel level
 via specialized interfaces like vhost-net. A similar helper for UML is planned
@@ -87,7 +94,8 @@ Example:
 ```shell
 vecX:transport=hybrid,ifname=tap0,depth=128,gro=1
 ```
-This is an experimental/demo transport which couples tap for transmit and a raw socket for receive. The raw socket allows multi-packet receive resulting in
+This is an experimental/demo transport which couples tap for transmit and
+a raw socket for receive. The raw socket allows multi-packet receive resulting in
 significantly higher packet rates than normal tap
 
 ### raw socket transport
@@ -248,4 +256,6 @@ please see the BESS documentation.
 
 https://github.com/NetSys/bess/wiki/Built-In-Modules-and-Ports
 
+## Configuring Legacy transports
 
+Legacy transports are now considered obsolete. Please use the vector versions.
