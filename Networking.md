@@ -34,6 +34,19 @@ up to 1Mps or more.
 * Daemon and bess require running a local switch. This switch may be connected to the host as well.
 
 
+## Netowrk configuration privilege
+
+Majority of the supported networking modes need `root` privileges. For example,
+in the legacy tuntap networking mode, users were required to be part of the group
+associated with the tunnel device.
+
+For newer network drivers like the vector transports, `root` privilege is required to
+fire an ioctl to setup the tun interface.
+
+In precise terms, this can be achieved by granting the user a subset of the capability.
+In case of vector transport, a user can add capability CAP_NET_ADMIN, to the uml
+binary. Theneceforth, UML can be run with normal user privilges, along with full networking.
+
 ## Configuring vector transports
 
 All vector transports support a similar syntax:
