@@ -34,18 +34,23 @@ up to 1Mps or more.
 * Daemon and bess require running a local switch. This switch may be connected to the host as well.
 
 
-## Netowrk configuration privilege
+## Network configuration privileges
 
-Majority of the supported networking modes need `root` privileges. For example,
+The majority of the supported networking modes need `root` privileges. For example,
 in the legacy tuntap networking mode, users were required to be part of the group
 associated with the tunnel device.
 
 For newer network drivers like the vector transports, `root` privilege is required to
-fire an ioctl to setup the tun interface.
+fire an ioctl to setup the tun interface and/or use raw sockets where needed.
 
 In precise terms, this can be achieved by granting the user a subset of the capability.
-In case of vector transport, a user can add capability CAP_NET_ADMIN, to the uml
+In case of vector transport, a user can add capability `CAP_NET_ADMIN` or `CAP_NET_RAW`, to the uml
 binary. Theneceforth, UML can be run with normal user privilges, along with full networking.
+
+For example:
+```
+sudo setcap cap_net_raw,cap_net_admin+ep linux
+```
 
 ## Configuring vector transports
 
@@ -101,6 +106,11 @@ which is offered only to something which can hook up to it at kernel level
 via specialized interfaces like vhost-net. A similar helper for UML is planned
 at some point in the future.
 
+The tap transport requires either:
+
+1. tap interface to exist and be created persistent and owned by the UML user using tunctl. Example `tunctl -u uml-user -t tap0`
+1. UML binary to have `CAP_NET_ADMIN` privilege
+
 ### hybrid transport
 
 Example:
@@ -110,6 +120,8 @@ vecX:transport=hybrid,ifname=tap0,depth=128,gro=1
 This is an experimental/demo transport which couples tap for transmit and
 a raw socket for receive. The raw socket allows multi-packet receive resulting in
 significantly higher packet rates than normal tap
+
+The hybrid binary requires `CAP_NET_RAW` capability by the UML user as well as the requirements for the tap transport.
 
 ### raw socket transport
 Example:
@@ -148,6 +160,8 @@ In either case the bpf code is loaded into the host kernel. While this is
 presently limited to legacy bpf syntax (not ebpf), it is still a security
 risk. It is not recommended to allow this unless the User Mode Linux instance
 is considered trusted.
+
+Raw socket transport requires `CAP_NET_RAW` capability.
 
 ### gre socket transport
 Example:
@@ -192,6 +206,8 @@ down ip link del gt0 || true
 ```
 
 Additionally, GRE has been tested versus a variety of network equipment.
+
+GRE requires `CAP_NET_RAW`
 
 ### l2tpv3 socket transport
 _Warning_. L2TPv3 has a "bug". It is the "bug" known as "has more options than GNU ls". While it has some advantages, there are usually easier (and less verbose) ways to connect a UML instance to something. Fir example, most devices which support L2TPv3
@@ -246,6 +262,8 @@ pre-up ip l2tp add tunnel remote 127.0.0.1 local 127.0.0.1 encap udp tunnel_id 2
 down ip l2tp del session tunnel_id 2 session_id 0xffffffff && ip l2tp del tunnel tunnel_id 2
 ```
 
+L2TPv3 requires `CAP_NET_RAW` for raw IP mode and no special privileges for the UDP mode.
+
 ### BESS socket transport
 
 BESS is a high performance modular network switch. 
@@ -268,6 +286,8 @@ For BESS configuration and how to allocate a BESS Unix domain socket port
 please see the BESS documentation.
 
 https://github.com/NetSys/bess/wiki/Built-In-Modules-and-Ports
+
+BESS transport does not require any special privileges.
 
 ## Configuring Legacy transports
 
