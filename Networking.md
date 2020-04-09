@@ -76,6 +76,7 @@ correctly.
 1. mtu = int - sets the interface mtu
 1. headroom = int - adjusts the default headroom (32 bytes) reserved if a packet
 will need to be re-encapsulated into let's say VXLAN.
+1. vec = 0 - disable multipacket io and fall back to packet at a time mode
 
 # Shared Options
 
