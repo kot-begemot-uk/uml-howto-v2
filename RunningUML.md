@@ -90,3 +90,173 @@ If you have not set up a password when generating the image, you will have to sh
 instance, mount the image, chroot into it and set it - as described in the Generating an Image section.
 
 If the password is already set, you can just log in.
+
+## The UML Management Console
+
+In addition to managing the image from "the inside" using normal sysadmin tools, it is possible
+to perform a number of low level operations using the UML management console.
+
+The UML management console is a low-level interface to the kernel on a running UML instance,
+somewhat like the i386 SysRq interface.  Since there is a full-blown
+operating system under UML, there is much greater flexibility possible
+than with the SysRq mechanism.
+
+
+There are a number of things you can do with the mconsole interface:
+
+* get the kernel version
+* add and remove devices
+* halt or reboot the machine
+* Send SysRq commands
+* Pause and resume the UML
+* Inspect processes running inside UML
+* Inspect UML internal /proc state
+
+
+You need the mconsole client (uml_mconsole) which is a part of the UML
+tools package available in most Linux distritions.
+You also need `CONFIG_MCONSOLE` (under 'General Setup') enabled in UML.  When you boot UML, you'll see a line like:
+
+```
+mconsole initialized on /home/jdike/.uml/umlNJ32yL/mconsole
+```
+
+If you specify a unique machine id one the UML command line, i.e.
+
+```
+umid=debian
+```
+
+you'll see this
+
+```
+mconsole initialized on /home/jdike/.uml/debian/mconsole
+```
+
+That file is the socket that uml_mconsole will use to communicate with
+UML.  Run it with either the umid or the full path as its argument:
+
+```
+host$ uml_mconsole debian
+```
+
+or
+
+```
+host$ uml_mconsole /home/jdike/.uml/debian/mconsole
+```
+
+You'll get a prompt, at which you can run one of these commands:
+
+* version
+* help
+* halt
+* reboot
+* config
+* remove
+* sysrq
+* help
+* cad
+* stop
+* go
+* proc
+* stack
+
+### version
+
+This takes no arguments.  It prints the UML version.
+
+```
+(mconsole)  version
+OK Linux OpenWrt 4.14.106 #0 Tue Mar 19 08:19:41 2019 x86_64
+```
+
+There are a couple actual uses for this.  It's a simple no-op which
+can be used to check that a UML is running.  It's also a way of
+sending a device interrupt to the UML. UML mconsole is treated internally as
+a UML device. 
+
+### help
+
+This takes no arguments. It prints a short help screen with the
+supported mconsole commands.
+
+
+### halt and reboot
+
+These take no arguments.  They shut the machine down immediately, with
+no syncing of disks and no clean shutdown of userspace.  So, they are
+pretty close to crashing the machine.
+
+```
+(mconsole)  halt
+OK
+```
+
+
+# config
+
+"config" adds a new device to the virtual machine. This is supported
+by most UML device drivers. It takes one argument, which is the
+device to add, with the same syntax as the kernel command line.
+
+```
+(mconsole)
+config ubd3=/home/jdike/incoming/roots/root_fs_debian22
+OK
+```
+
+### remove
+
+"remove" deletes a device from the system.  Its argument is just the
+name of the device to be removed. The device must be idle in whatever
+sense the driver considers necessary.  In the case of the ubd driver,
+the removed block device must not be mounted, swapped on, or otherwise
+open, and in the case of the network driver, the device must be down.
+
+```
+(mconsole)  remove ubd3
+OK
+(mconsole)  remove eth1
+OK
+```
+
+### sysrq
+
+This takes one argument, which is a single letter.  It calls the
+generic kernel's SysRq driver, which does whatever is called for by
+that argument.  See the SysRq documentation in
+Documentation/admin-guide/sysrq.rst in your favorite kernel tree to
+see what letters are valid and what they do.
+
+
+
+### cad
+
+This invokes the Ctl-Alt-Del action in the running image.  What exactly this ends
+up doing is up to init, systemd, etc.  Normally, it reboots the machine.
+
+### stop
+
+This puts the UML in a loop reading mconsole requests until a 'go'
+mconsole command is received. This is very useful as a debugging/snapshotting
+tool.
+
+### go
+
+This resumes a UML after being paused by a 'stop' command. Note that
+when the UML has resumed, TCP connections may have timed out and if
+the UML is paused for a long period of time, crond might go a little
+crazy, running all the jobs it didn't do earlier.
+
+### proc
+
+This takes one argument - the name of a file in /proc which is printed
+to the mconsole standard output
+
+### stack
+
+This takes one argument - the pid number of a process. Its stack is
+printed to a standard output.
+
+

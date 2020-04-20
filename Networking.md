@@ -1,4 +1,4 @@
-# UML Networking
+# Setting Up UML Networking
 
 UML networking is designed to emulate an Ethernet connection. This
 connection may be either a point-to-point (similar to a connection
