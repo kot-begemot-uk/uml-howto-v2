@@ -181,3 +181,25 @@ if a file is changed without UML's knowledge, UML will not know about it and its
 the file may be corrupt. While it is possible to fix this, it is not something which is being worked on
 at present.
 
+## Tuning UML
+
+UML at present is strictly uniprocessor. It will, however spin up a number of threads to handle various functions.
+
+The UBD driver, SIGIO and the MMU emulation spin up threads. If the system is idle, these threads will be
+migrated to other processors on a SMP host. This, unfortunately, will usually result in LOWER performance because of
+all of the cache/memory synchronization traffic between cores. As a result, UML will usually benefit from being pinned on
+a single CPU especially on a large system. This can result in performance differences of 5 times or higher on
+some benchmarks. 
+
+Similarly, on large multi-node NUMA systems UML will benefit if all of its memory is allocated from the same NUMA node it will
+run on. The OS will *NOT* do that by default. In order to do that, the sysadmin needs to create a suitable tmpfs
+ramdisk bound to a particular node and use that as the source for UML RAM allocation by specifying it  in the TMP or TEMP
+environment variables. UML will look at the values of TMPDIR, TMP or TEMP 
+for that. If that fails, it will look for shmfs mounted under /dev/shm. If everything else fails use /tmp/ regardless of the filesystem
+type used for it.
+
+```
+mount -t tmpfs -ompol=bind:X none /mnt/tmpfs-nodeX
+TEMP=/mnt/tmpfs-nodeX taskset -cX linux options options options.. 
+```
+
