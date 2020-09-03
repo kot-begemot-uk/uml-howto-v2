@@ -74,7 +74,7 @@ the actual IO calls, their arguments and returns values.
 
 ## Kernel debugging
 
-You an run UML under gdb now, though it will not necessarily agree to be started under it. If 
+You can run UML under gdb now, though it will not necessarily agree to be started under it. If 
 you are trying to track a runtime bug, it is much better to attach gdb to a running UML instance
 and let UML run.
 

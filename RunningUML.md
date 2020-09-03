@@ -30,7 +30,7 @@ a root file system.
     that a COW file has not been specified as the image. To turn them off, use the d flag after ubdX
     1. UBD supports TRIM - asking the Host OS to reclaim any unused blocks in the image. To turn it off,
     specify the t flag after ubdX
-1. root= root device - most likely /dev/ubd0 (this is a Linux 
+1. root= root device - most likely /dev/ubd0 (this is a Linux filesystem image)
 
 ### Important Optional Arguments
 
@@ -63,7 +63,7 @@ is input, the second one output.
 1. The port channel - listen on tcp port number. Example: `con1=port:4321`
 1. The pty and pts channels - use system pty/pts. 
 1. The tty channel - bind to an existing system tty. Example: `con1=/dev/tty8` will make UML use the host 8th console (usually unused).
-1. The xterm channel - this is the default on - bring up an xterm on this channel and direct IO to it. Note, in order for xterm to work,
+1. The xterm channel - this is the default - bring up an xterm on this channel and direct IO to it. Note, that in order for xterm to work,
 the host must have the UML distribution package installed. This usually contains the port-helper and other utilities needed for UML to
 communicate with the xterm. Alternatively, these need to be complied and installed from source.
 
@@ -113,9 +113,9 @@ There are a number of things you can do with the mconsole interface:
 * Inspect UML internal /proc state
 
 
-You need the mconsole client (uml_mconsole) which is a part of the UML
+You need the mconsole client (uml\_mconsole) which is a part of the UML
 tools package available in most Linux distritions.
-You also need `CONFIG_MCONSOLE` (under 'General Setup') enabled in UML.  When you boot UML, you'll see a line like:
+You also need `CONFIG_MCONSOLE` (under 'General Setup') enabled in the UML kernel.  When you boot UML, you'll see a line like:
 
 ```
 mconsole initialized on /home/jdike/.uml/umlNJ32yL/mconsole

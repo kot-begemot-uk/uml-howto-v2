@@ -32,7 +32,7 @@ anything in terms of special CPU features.
 The UML userspace, however, is a bit different. The Linux kernel on the
 host machine assists UML in intercepting everything the program running
 on a UML instance is trying to do and making the UML kernel handle all
-of its requests.
+of its requests. 
 
 This is different from other virtualization packages which do not make any
 difference between the guest kernel and guest programs. This difference
@@ -70,7 +70,7 @@ what UML does (very useful for things like tests).
 
 1. The syscall interception technique used by UML makes it inherently slower
 for any userspace applications. While it can do kernel tasks on par with most
-other virtualization packages, its userspace is slow. The root cause is that
+other virtualization packages, its userspace is **slow**. The root cause is that
 UML has a very high cost of creating new processes and threads (something
 most Unix/Linux applications take for granted).
 

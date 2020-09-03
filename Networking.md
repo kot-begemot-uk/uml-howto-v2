@@ -82,10 +82,11 @@ will need to be re-encapsulated into let's say VXLAN.
 
 1. ifname = str Transports which bind to a local network interface share another option - the
 name of the interface to bind to. This is the ifname option.
-1. src, dst, src\_port, dst\_port - all transports which use a sockets which has the notion
+1. src, dst, src\_port, dst\_port - all transports which use sockets which have the notion
 of source and destination and/or source port and destination port use these to specify them.
 1. v6 = 0/1 to specify if a v6 connection is desired for all transports which operate over
-IP.
+IP. Additionally, for transports that have some differences in the way they operate over v4
+and v6 (f.e. EoL2TPv3), sets the correct mode of operation.
 
 ### tap transport
 
@@ -93,21 +94,21 @@ Example:
 ```shell
 vecX:transport=tap,ifname=tap0,depth=128,gro=1
 ```
-This will connect vec0 to tap0 on the host. Tap0 must be created (f.e. using
-tunctl) and UP.
+This will connect vec0 to tap0 on the host. Tap0 must already exist (f.e. 
+created using tunctl) and UP.
 
-tap0 can be either configured as a point-to-point interface and given ip
+tap0 can be configured as a point-to-point interface and given an ip
 address so that UML can talk to the host. Alternatively, it is possible to
-connect UML to a tap interface which is a part of the bridge.
+connect UML to a tap interface which is a part of a bridge.
 
 While tap relies on the vector infrastructure, it is not a true vector transport
 at this point, because Linux does not support multi-packet IO on tap
 file descriptors for normal userspace apps like UML. This is a privilege
 which is offered only to something which can hook up to it at kernel level
-via specialized interfaces like vhost-net. A similar helper for UML is planned
+via specialized interfaces like vhost-net. A vhost-net like helper for UML is planned
 at some point in the future.
 
-The tap transport requires either:
+Privileges required: tap transport requires either:
 
 1. tap interface to exist and be created persistent and owned by the UML user using tunctl. Example `tunctl -u uml-user -t tap0`
 1. UML binary to have `CAP_NET_ADMIN` privilege
@@ -122,7 +123,7 @@ This is an experimental/demo transport which couples tap for transmit and
 a raw socket for receive. The raw socket allows multi-packet receive resulting in
 significantly higher packet rates than normal tap
 
-The hybrid binary requires `CAP_NET_RAW` capability by the UML user as well as the requirements for the tap transport.
+Privileges required: hybrid requires `CAP_NET_RAW` capability by the UML user as well as the requirements for the tap transport.
 
 ### raw socket transport
 Example:
@@ -162,7 +163,7 @@ presently limited to legacy bpf syntax (not ebpf), it is still a security
 risk. It is not recommended to allow this unless the User Mode Linux instance
 is considered trusted.
 
-Raw socket transport requires `CAP_NET_RAW` capability.
+Privileges required: raw socket transport requires `CAP_NET_RAW` capability.
 
 ### gre socket transport
 Example:
@@ -208,7 +209,7 @@ down ip link del gt0 || true
 
 Additionally, GRE has been tested versus a variety of network equipment.
 
-GRE requires `CAP_NET_RAW`
+Privileges required: GRE requires `CAP_NET_RAW`
 
 ### l2tpv3 socket transport
 _Warning_. L2TPv3 has a "bug". It is the "bug" known as "has more options than GNU ls". While it has some advantages, there are usually easier (and less verbose) ways to connect a UML instance to something. Fir example, most devices which support L2TPv3
@@ -263,7 +264,7 @@ pre-up ip l2tp add tunnel remote 127.0.0.1 local 127.0.0.1 encap udp tunnel_id 2
 down ip l2tp del session tunnel_id 2 session_id 0xffffffff && ip l2tp del tunnel tunnel_id 2
 ```
 
-L2TPv3 requires `CAP_NET_RAW` for raw IP mode and no special privileges for the UDP mode.
+Privileges required: L2TPv3 requires `CAP_NET_RAW` for raw IP mode and no special privileges for the UDP mode.
 
 ### BESS socket transport
 

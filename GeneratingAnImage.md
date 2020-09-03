@@ -5,7 +5,7 @@ the shelf install media to install into a blank VM using a virtualization
 package, there is no UML equivalent. You have to use appropriate tools on
 your host to build a viable filesystem image.
 
-This is extremely easy on debian - you can do it using debootstrap. It is
+This is extremely easy on Debian - you can do it using debootstrap. It is
 also easy on OpenWRT - the build process can build UML images. All other
 distros - YMMV.
 
@@ -43,7 +43,7 @@ The easiest way to do that is to chroot to the mounted image.
 ```
 ## Edit key system files
 
-### Edit /mnt/etc/fstab
+### Edit fstab
 
 UML block devices are called ubds. The fstab created by debootstrap will be
 empty and it needs an entry for the root file system:
@@ -52,13 +52,13 @@ empty and it needs an entry for the root file system:
   /dev/ubd0               ext4    discard,errors=remount-ro  0       1
 ```
   
-### Edit /etc/hostname. 
+### Edit hostname. 
 
 It will be set to the same as the host on which you 
   are creating the image. It is a good idea to change that to avoid "Oh,
   bummer, I rebooted the wrong machine".
  
-### Edit /etc/network/interfaces
+### Edit network/interfaces on Debian or sysconfig/network-scripts/ifcfg-X on Red Hat
 
 UML supports two classes of network devices - the older uml\_net ones which
 are scheduled for obsoletion. These are called ethX. It also suports the 
@@ -84,7 +84,7 @@ kernel and modules for it.
 Most distributions have a UML package. Even if you intend to use your own
 kernel, testing the image with a stock one is always a good start. These
 packages come with a set of modules which should be copied to the target
-filesystem. The location is distribution dependent. For debian these reside
+filesystem. The location is distribution dependent. For Debian these reside
 under /usr/lib/uml/modules. Copy recursively the content of this directory
 to the mounted UML filesystem:
 ```shell
